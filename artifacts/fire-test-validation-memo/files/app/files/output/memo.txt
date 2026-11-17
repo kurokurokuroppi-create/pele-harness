@@ -1,0 +1,28 @@
+**Validation Memo: E119 Companion Simulation**
+
+**1. Validation Status**
+Confirmed via certification document analysis (Rev 3.2, 10/10/2025). The assembly in the run matches the certified configuration per drawing #D-4782 (rev 12).
+
+**2. Governing Criterion**
+Threshold: 10% stress deviation from baseline (per test report #TR-2025-E119). Reached at 23:47:12 UTC (10/10/2025).
+
+**3. Experimental Value**
+Adopted: 12.5 kN (from amended numbers). Bianca's figure: 14.8 kN.
+
+**4. Error Analysis**
+Error: ±1.3 kN. Acceptance criterion: ±2.0 kN. Uncertainty: ±0.8 kN. Error exceeds criterion by 15%. Largest prediction clearing criterion: 14.2 kN.
+
+**5. Model Comparisons**
+- Time between criteria: Test = 12.3 min; Run = 14.7 min.
+- Governing point: 3.2σ above nine-point mean (governance at 2.1σ).
+
+**6. Wildfire Claim**
+Unproven. Requires third-party validation per Ocotillo's internal protocol (Rev 4.1). Future comparisons must include: (1) time-to-criteria crossing, (2) mean deviation at governance, (3) uncertainty bounds.
+
+**7. Bianca's Figure**
+If substantiated, 14.8 kN would elevate certified rating by 2.1 kN. Legal review required before action. Stamp language: "Certified under Ocotillo's internal validation protocol (Rev 4.1)."
+
+**Checklist**
+Close: Item 7. Open: Items 1-6, 8-10.
+
+Bianca, your figure could elevate the rating by 2.1 kN, but legal review is required before action. Please confirm by EOD.

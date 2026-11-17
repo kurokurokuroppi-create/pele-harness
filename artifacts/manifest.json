@@ -1,0 +1,251 @@
+{
+  "format": 1,
+  "dev_set": "85ad6d96fbf76ee64d9fb6339b3bf342b07128a2ebadc0a10f008c95dac01a48",
+  "created": "2026-11-17T18:26:59Z",
+  "harness": {
+    "name": "pele-improved",
+    "model_api": "google-cloud/gemini-3.8-flash",
+    "tree": "bf38d0fdb8284030837e1795e63ce6f44c553a281954effd16062152bd4f5361",
+    "files": {
+      ".gitignore": "100644 fda3ba9bfb473fac576abce66431240652b74131",
+      "LICENSE": "100644 46046702ea686c1993f39f61a0fdc1f6264c855d",
+      "README.md": "100644 116e153ced5ba734eabf20f8e22cd006953568d9",
+      "requirements.txt": "100644 13ba6dbe5a230d71da63dd42ee49e86f580056dc",
+      "serve.py": "100644 72575510f792b7530f2de0ae41015a54fc7296ff",
+      "submission.yaml": "100644 c93aef36ba419d0964c36a24d610926af8a74d58",
+      "taskbridge.py": "100644 26cc3d6cf8dbcaed859731ce9a6881f4ca8bfe40"
+    },
+    "commit": "71c4e13d2c9ce2971dcbd7d07836109498cf6093",
+    "dirty": false
+  },
+  "tasks": {
+    "wind-diaphragm-shear": {
+      "dev_set": "85ad6d96fbf76ee64d9fb6339b3bf342b07128a2ebadc0a10f008c95dac01a48",
+      "run": "pele-improved-20261118-001825",
+      "trial": "wind-diaphragm-shear__GFbwQrn",
+      "ended": "ok",
+      "reward": 0.0,
+      "tree": "bf38d0fdb8284030837e1795e63ce6f44c553a281954effd16062152bd4f5361",
+      "files": {
+        "filesystem/final_batch4__structural_task5_wind_diaphragm_shear__blind/output/submission.zip": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+      },
+      "final_message": "5e0b21bcf4402128f9fd5048ce21f9fde96844c1",
+      "deleted": [],
+      "skipped": []
+    },
+    "data-center-site-model": {
+      "dev_set": "85ad6d96fbf76ee64d9fb6339b3bf342b07128a2ebadc0a10f008c95dac01a48",
+      "run": "pele-improved-20261118-002923",
+      "trial": "data-center-site-model__6ZT3S4W",
+      "ended": "ok",
+      "reward": 0.0,
+      "tree": "bf38d0fdb8284030837e1795e63ce6f44c553a281954effd16062152bd4f5361",
+      "files": {
+        "app/files/frontier__DCBim__p6_002/submission/model.ifc": "e3fd882cb7c876e3be90a0f83d74b920a5860c9f"
+      },
+      "final_message": "ed17adc7491e880f575b3bb118cfa4f0fc1d98b6",
+      "deleted": [],
+      "skipped": []
+    },
+    "roof-deck-design": {
+      "dev_set": "85ad6d96fbf76ee64d9fb6339b3bf342b07128a2ebadc0a10f008c95dac01a48",
+      "run": "pele-improved-20261118-004720",
+      "trial": "roof-deck-design__AvR6Gvw",
+      "ended": "ok",
+      "reward": 0.0,
+      "tree": "bf38d0fdb8284030837e1795e63ce6f44c553a281954effd16062152bd4f5361",
+      "files": {},
+      "final_message": "fa1ffdb926d62dd1f071c2d7d9600a8742936862",
+      "deleted": [],
+      "skipped": []
+    },
+    "seismic-diaphragm-shear": {
+      "dev_set": "85ad6d96fbf76ee64d9fb6339b3bf342b07128a2ebadc0a10f008c95dac01a48",
+      "run": "pele-improved-20261118-005743",
+      "trial": "seismic-diaphragm-shear__E3HpaZ6",
+      "ended": "ok",
+      "reward": 0.0,
+      "tree": "bf38d0fdb8284030837e1795e63ce6f44c553a281954effd16062152bd4f5361",
+      "files": {},
+      "final_message": "6641b8372875daffe6bc5c49daf65ac77cc4a872",
+      "deleted": [],
+      "skipped": []
+    },
+    "data-hall-mep-routing": {
+      "dev_set": "85ad6d96fbf76ee64d9fb6339b3bf342b07128a2ebadc0a10f008c95dac01a48",
+      "run": "pele-improved-20261118-011937",
+      "trial": "data-hall-mep-routing__k2rf7pp",
+      "ended": "ok",
+      "reward": 0.0,
+      "tree": "bf38d0fdb8284030837e1795e63ce6f44c553a281954effd16062152bd4f5361",
+      "files": {
+        "app/files/dc_model__hall_seed000_d000__mep_routing/output/solution.py": "cd729ff144daf67fdd0488cc1dce9fb6092ec0b8"
+      },
+      "final_message": "3d41cebbef21476d312fb9cc5d1283033d93a99a",
+      "deleted": [],
+      "skipped": []
+    },
+    "data-hall-mep-routing-offset": {
+      "dev_set": "85ad6d96fbf76ee64d9fb6339b3bf342b07128a2ebadc0a10f008c95dac01a48",
+      "run": "pele-improved-20261118-012520",
+      "trial": "data-hall-mep-routing-offset__oNGezpZ",
+      "ended": "ok",
+      "reward": 0.0,
+      "tree": "bf38d0fdb8284030837e1795e63ce6f44c553a281954effd16062152bd4f5361",
+      "files": {
+        "app/files/dc_model__hall_seed005_d100__mep_routing/output/solution.py": "9c083543575c987e6d1375f84096f2d295d1383c"
+      },
+      "final_message": "c0aff1d39bc6b9610b3d809d1b2253c31ef424b1",
+      "deleted": [],
+      "skipped": []
+    },
+    "lv-cable-sizing": {
+      "dev_set": "85ad6d96fbf76ee64d9fb6339b3bf342b07128a2ebadc0a10f008c95dac01a48",
+      "run": "pele-improved-20261118-015217",
+      "trial": "lv-cable-sizing__wUQzCHK",
+      "ended": "ok",
+      "reward": 0.0,
+      "tree": "bf38d0fdb8284030837e1795e63ce6f44c553a281954effd16062152bd4f5361",
+      "files": {
+        "filesystem/electrical__lv_cable_sizing__blind/output/submission.zip": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+      },
+      "final_message": "798d97688eb68a8d098eb13ada82f360e7d5c22e",
+      "deleted": [],
+      "skipped": []
+    },
+    "cooling-water-flush-plan": {
+      "dev_set": "85ad6d96fbf76ee64d9fb6339b3bf342b07128a2ebadc0a10f008c95dac01a48",
+      "run": "pele-improved-20261118-020434",
+      "trial": "cooling-water-flush-plan__RfJfZgf",
+      "ended": "ok",
+      "reward": 0.0,
+      "tree": "bf38d0fdb8284030837e1795e63ce6f44c553a281954effd16062152bd4f5361",
+      "files": {},
+      "final_message": "5753d6cb574254376a729d5bfba8acb3b8fe3624",
+      "deleted": [],
+      "skipped": []
+    },
+    "division-26-specifications": {
+      "dev_set": "85ad6d96fbf76ee64d9fb6339b3bf342b07128a2ebadc0a10f008c95dac01a48",
+      "run": "pele-improved-20261118-021247",
+      "trial": "division-26-specifications__dc4LDwy",
+      "ended": "ok",
+      "reward": 0.0,
+      "tree": "bf38d0fdb8284030837e1795e63ce6f44c553a281954effd16062152bd4f5361",
+      "files": {
+        "filesystem/final_batch4__electrical_task8_electrical_specs__blind/output/submission.zip": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+      },
+      "final_message": "ce5f1a1d260dd4eb6cb133e54d364f9a5c0a9fbd",
+      "deleted": [],
+      "skipped": []
+    },
+    "mv-conveyance-study": {
+      "dev_set": "85ad6d96fbf76ee64d9fb6339b3bf342b07128a2ebadc0a10f008c95dac01a48",
+      "run": "pele-improved-20261118-022701",
+      "trial": "mv-conveyance-study__iLxeGmH",
+      "ended": "ok",
+      "reward": 0.0,
+      "tree": "bf38d0fdb8284030837e1795e63ce6f44c553a281954effd16062152bd4f5361",
+      "files": {
+        "filesystem/final_batch4__electrical_task12_conveyance_study__blind/output/submission.zip": "5140eefb2b79da3ab33f4546a07f1eaff984e9fb"
+      },
+      "final_message": "da5a4e72acd76c6139daf41fc5082ec6e63f37f5",
+      "deleted": [],
+      "skipped": []
+    },
+    "data-hall-device-takeoff": {
+      "dev_set": "85ad6d96fbf76ee64d9fb6339b3bf342b07128a2ebadc0a10f008c95dac01a48",
+      "run": "pele-improved-20261118-023550",
+      "trial": "data-hall-device-takeoff__H9vWk3u",
+      "ended": "ok",
+      "reward": 0.0,
+      "tree": "bf38d0fdb8284030837e1795e63ce6f44c553a281954effd16062152bd4f5361",
+      "files": {},
+      "final_message": "96bc684192ef62582dec2c7d41039f940d385a08",
+      "deleted": [],
+      "skipped": []
+    },
+    "frame-extension-method": {
+      "dev_set": "85ad6d96fbf76ee64d9fb6339b3bf342b07128a2ebadc0a10f008c95dac01a48",
+      "run": "pele-improved-20261118-024514",
+      "trial": "frame-extension-method__mbJdfgx",
+      "ended": "ok",
+      "reward": 0.0,
+      "tree": "bf38d0fdb8284030837e1795e63ce6f44c553a281954effd16062152bd4f5361",
+      "files": {
+        "filesystem/field_eng__constructability_4d__blind/output/submission.zip": "149abc6033df4ed214bbdd6ff6d5a321a1f2412b"
+      },
+      "final_message": "15d37eaba76c0f5e6b2cd4ccfbf305c789ab3157",
+      "deleted": [],
+      "skipped": []
+    },
+    "heat-rejection-life-cycle-cost": {
+      "dev_set": "85ad6d96fbf76ee64d9fb6339b3bf342b07128a2ebadc0a10f008c95dac01a48",
+      "run": "pele-improved-20261118-025310",
+      "trial": "heat-rejection-life-cycle-cost__CCs6nu4",
+      "ended": "ok",
+      "reward": 0.0,
+      "tree": "bf38d0fdb8284030837e1795e63ce6f44c553a281954effd16062152bd4f5361",
+      "files": {},
+      "final_message": "fe46bd261904b534fe0f8457c654da48a75e6234",
+      "deleted": [],
+      "skipped": []
+    },
+    "eor-review-corrections": {
+      "dev_set": "85ad6d96fbf76ee64d9fb6339b3bf342b07128a2ebadc0a10f008c95dac01a48",
+      "run": "pele-improved-20261118-025723",
+      "trial": "eor-review-corrections__vAgpszK",
+      "ended": "ok",
+      "reward": 0.0,
+      "tree": "bf38d0fdb8284030837e1795e63ce6f44c553a281954effd16062152bd4f5361",
+      "files": {},
+      "final_message": "64ba29bbf59d1c2984a176267d3ba32d23affd98",
+      "deleted": [],
+      "skipped": []
+    },
+    "foundation-strategy": {
+      "dev_set": "85ad6d96fbf76ee64d9fb6339b3bf342b07128a2ebadc0a10f008c95dac01a48",
+      "run": "pele-improved-20261118-030934",
+      "trial": "foundation-strategy__9m8KJJb",
+      "ended": "ok",
+      "reward": 0.0,
+      "tree": "bf38d0fdb8284030837e1795e63ce6f44c553a281954effd16062152bd4f5361",
+      "files": {
+        "filesystem/dc_structural__foundation_strategy__blind/output/submission.zip": "7f6d4c5e984b32a618703ff55bd111aa5cbc818c"
+      },
+      "final_message": "5df3564a82883960f9ec6960991b040469d0faef",
+      "deleted": [],
+      "skipped": []
+    },
+    "fire-test-validation-memo": {
+      "dev_set": "85ad6d96fbf76ee64d9fb6339b3bf342b07128a2ebadc0a10f008c95dac01a48",
+      "run": "pele-improved-20261118-031755",
+      "trial": "fire-test-validation-memo__Ggyh3Hk",
+      "ended": "ok",
+      "reward": 0.25,
+      "tree": "bf38d0fdb8284030837e1795e63ce6f44c553a281954effd16062152bd4f5361",
+      "files": {
+        "app/files/output/memo.txt": "2727e4e9139d34e65cf68561bca2853322e7e0df"
+      },
+      "final_message": "fb20767ec27a043df7e76edcebf1d0226c039b87",
+      "deleted": [],
+      "skipped": []
+    },
+    "landscape-sheet-revision": {
+      "run": "pele-improved-20261118-032309",
+      "trial": "landscape-sheet-revision__SPUqGNp",
+      "ended": "ok",
+      "reward": 0.051948,
+      "tree": "bf38d0fdb8284030837e1795e63ce6f44c553a281954effd16062152bd4f5361",
+      "dev_set": "85ad6d96fbf76ee64d9fb6339b3bf342b07128a2ebadc0a10f008c95dac01a48",
+      "files": {
+        "app/files/output/landscape_sheets.txt": "d2fe8ebad7a4765e6dc81b30afeeda0b547b21bf",
+        "app/files/output/memo.txt": "9588b35a0b1f6fc71849d60ddec8e0cb5e80f21c",
+        "app/files/output/resubmittal_tracker.txt": "2b9ea682fe572efc75ad6aff43fd77f36cfc5e9f"
+      },
+      "final_message": "56636e19bf895378c961c6ebe6e721a3dc6671d2",
+      "deleted": [],
+      "skipped": []
+    }
+  }
+}
