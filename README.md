@@ -78,7 +78,11 @@ unverifiable, since an MCP tool's side effects are unknown).
 
 ## Status
 
-This harness has **not** been run end-to-end: no `kit check`, no Docker,
-and no model call has been made with it. Only Python syntax compilation
-and offline unit checks of the pure helper functions were performed.
-See `../harness-design.md` for the design record and unverified items.
+`kit check` passed on 2026-11-17 (validate / files / build / model /
+listen / smoke / mcp) in a local Docker environment, using a locally
+hosted substitute model routed under the declared model's name; the
+declared model itself (`google-cloud/gemini-3.8-flash`) has not been
+called yet. `artifacts/` holds the dev-set runs from the local
+substitute model: 23 of 29 tasks usable, 3 empty, 3 missing.
+See `../kit-check-20261117.md` for the check record and
+`../harness-design.md` for the design record and unverified items.

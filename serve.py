@@ -689,6 +689,30 @@ async def agent(session, registry, messages, tools, until, final=False):
       messages[-1]["content"] += f"\n[{int(remain // 60)} minutes left for this step]"
 
 
+def is_pass(verdict):
+  """Returns True when a verifier reply names no gaps.
+
+  The verifier is told to answer the single word PASS, but models often
+  add a sentence ("PASS. All deliverables check out."), which must not
+  be mistaken for a gap list. PASS is accepted as the first word of the
+  reply, unless the reply also contains a numbered list (the instructed
+  format for gaps) or a "but" on the first line. An empty reply names
+  no gaps either.
+  """
+  text = (verdict or "").strip()
+  if not text:
+    return True
+  if re.search(r"(?m)^\s*\d+[.)]\s", text):
+    return False
+  first = text.splitlines()[0].strip("*_# \t")
+  if " but " in f" {first.lower()} ":
+    return False
+  upper = first.upper()
+  return upper == "PASS" or upper.startswith(
+      ("PASS ", "PASS:", "PASS.", "PASS—", "PASS-")
+  )
+
+
 # ------------------------------------------- deterministic self-check
 
 _PATH_RE = re.compile(r"(/app|/filesystem)/[^\s\"'\)\]\|<>]+")
@@ -800,9 +824,7 @@ async def solve(session):
         READ_ONLY, until(CHECK_SHARE / 2),
     )
     await session.log(f"verifier: {verdict[:1000]}")
-    # PASS alone in any letter case (Markdown emphasis / full stop aside),
-    # or an empty reply, names no gaps.
-    if verdict.strip("*_. \r\n\t").upper() in ("", "PASS") or not time_for(WRAP_UP_SEC):
+    if is_pass(verdict) or not time_for(WRAP_UP_SEC):
       break
     if fix_rounds >= MAX_FIX_ROUNDS:
       await session.log("verifier found gaps but the fix-round budget is used up")
