@@ -1,0 +1,26 @@
+<database_changes>
+=== DATABASE CHANGES SUMMARY ===
+Total rows added: 0
+Total rows deleted: 0
+Total rows modified: 0
+
+2 JSON file(s) excluded from this diff (not application state):
+  .apps_data/.coordinator/checkpoint_observations/physical_time.json: not application state
+  .apps_data/.coordinator/config/config.json: not application state
+
+
+(246 tables unchanged)
+
+=== Database: .apps_data/nextcloud_browser/nextcloud.db ===
+
+=== Database: .apps_data/mysql/database_dump.sql ===
+(unchanged)
+
+=== Database: .apps_data/nextcloud_browser/database_dump.sql ===
+
+=== Database: .apps_data/openproject/openproject_dump.sql ===
+
+=== Database: .apps_data/wiki_js/wiki_dump.sql ===
+
+=== Database: json ===
+</database_changes>
