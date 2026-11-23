@@ -1,0 +1,19 @@
+<document>
+<subject>Halbray Field Solar Site 3 Energization Confirmation</subject>
+<date>07/29/2025</date>
+<Basis>
+- Kelloway Permit (Correspondence/Kelloway_Permits_2024.pdf)
+- ISA-Halbray-Field-Site-3_Executed_Summary.pdf (Contracts/)
+- IEEE 1547-2018 Interconnection Standards (Standards/)
+</Basis>
+<tasks>
+- RTU/POI Recloser Reviews (SCADA/EMS & Distribution Protection Engineering)
+- Protection Coordination Study (Distribution Protection Engineering)
+- Backfeed Switching (Distribution Operations)
+- System Impact Study (Interconnection Studies)
+</tasks>
+<next_steps>
+- Confirm queue position with Meera Vellanki
+- Finalize energization date with Operations
+</next_steps>
+</document>
