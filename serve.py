@@ -715,7 +715,7 @@ def is_pass(verdict):
 
 # ------------------------------------------- deterministic self-check
 
-_PATH_RE = re.compile(r"(/app|/filesystem)/[^\s\"'\)\]\|<>]+")
+_PATH_RE = re.compile(r"(/app|/filesystem)/[^\s\"'\)\]\|<>`*]+")  # backticks / markdown bold end a path (task text)
 _TRAILING = ".,;:!"
 
 
@@ -733,23 +733,71 @@ def candidate_paths(*texts):
   return found[:50]
 
 
-async def deterministic_check(session, *texts):
-  """Checks that mentioned deliverable files exist and are non-empty.
+TINY_BYTES = 64  # a deliverable smaller than this is a placeholder, not a file
 
-  One bash call inside the task container; no model involved. Returns a
-  list of problem strings (empty when everything mentioned is present).
-  Paths the task only reads (inputs) can false-positive here, so the
-  caller phrases the result as files to confirm, not as proven gaps.
+# Runs inside the task container (python3 when present). Prints one line per problem:
+# MISSING / EMPTY / TINY <path> [<bytes>] or BAD <path> <reason>. Directories and inputs that exist are fine.
+_CHECK_PY = r"""
+import os, sys, zipfile
+TINY = int(sys.argv[1])
+for p in sys.argv[2:]:
+    if os.path.isdir(p):
+        continue
+    if not os.path.isfile(p):
+        print('MISSING', p); continue
+    n = os.path.getsize(p)
+    if n == 0:
+        print('EMPTY', p); continue
+    if n < TINY:
+        print('TINY', p, n); continue
+    ext = os.path.splitext(p)[1].lower()
+    try:
+        if ext in ('.zip', '.xlsx', '.docx', '.pptx'):
+            if not zipfile.is_zipfile(p):
+                print('BAD', p, 'not a valid zip container'); continue
+            z = zipfile.ZipFile(p)
+            names = [i for i in z.infolist() if not i.is_dir()]
+            if ext == '.zip':
+                small = [i.filename for i in names if i.file_size < TINY and not i.filename.endswith('.keep')]
+                if not names:
+                    print('BAD', p, 'zip has no files')
+                elif small:
+                    print('BAD', p, 'zip holds placeholder files: ' + ', '.join(small[:5]))
+            elif '[Content_Types].xml' not in z.namelist():
+                print('BAD', p, 'not an Office file')
+        elif ext == '.pdf':
+            with open(p, 'rb') as f:
+                if f.read(5) != b'%PDF-' or n < 1024:
+                    print('BAD', p, 'not a real PDF')
+    except Exception as e:
+        print('BAD', p, type(e).__name__)
+"""
+
+
+async def deterministic_check(session, *texts):
+  """Checks that mentioned deliverable files exist and are real files.
+
+  One call inside the task container; no model involved. Returns a list of
+  problem strings (empty when everything mentioned is fine): missing, empty,
+  placeholder-sized (< TINY_BYTES), or not a valid file of its format (zip /
+  Office / PDF; a zip whose members are placeholders). Paths the task only
+  reads (inputs) exist, so they never show up; directories are skipped.
   """
   paths = candidate_paths(*texts)
   if not paths:
     return []
-  script = "\n".join(
-      f"if [ -f {shlex.quote(p)} ]; then "
-      f"s=$(wc -c < {shlex.quote(p)}); "
-      f"if [ \"$s\" -gt 0 ]; then echo \"OK {p} $s\"; else echo \"EMPTY {p}\"; fi; "
-      f"else echo \"MISSING {p}\"; fi"
-      for p in paths
+  quoted = " ".join(shlex.quote(p) for p in paths)
+  script = (
+      "if command -v python3 >/dev/null 2>&1; then\n"
+      f"python3 - {TINY_BYTES} {quoted} <<'PELE_CHECK'\n{_CHECK_PY}\nPELE_CHECK\n"
+      "else\n"
+      + "\n".join(
+          f"if [ -d {shlex.quote(p)} ]; then :; elif [ -f {shlex.quote(p)} ]; then "
+          f"s=$(wc -c < {shlex.quote(p)}); if [ \"$s\" -eq 0 ]; then echo \"EMPTY {p}\"; "
+          f"elif [ \"$s\" -lt {TINY_BYTES} ]; then echo \"TINY {p} $s\"; fi; "
+          f"else echo \"MISSING {p}\"; fi"
+          for p in paths)
+      + "\nfi"
   )
   try:
     result = await session.exec(script, timeout_sec=60)
@@ -758,10 +806,92 @@ async def deterministic_check(session, *texts):
     return []
   problems = [
       line for line in result["output"].splitlines()
-      if line.startswith(("MISSING ", "EMPTY "))
+      if line.startswith(("MISSING ", "EMPTY ", "TINY ", "BAD "))
   ]
-  await session.log(f"deterministic check: {len(paths)} paths, {len(problems)} problems")
+  await session.log(f"deterministic check: {len(paths)} paths, {len(problems)} problems; checked: {paths[:8]}; problems: {problems[:8]}")
   return problems
+
+
+# Runs inside the task container at the very end (no model): for each .zip the task asks for,
+# (a) a missing / empty / invalid zip is rebuilt from the real files next to it, (b) a zip whose files all
+# sit under folders is repacked flat when the task wants the files at the archive root. File contents are
+# never changed; only the packing. Prints one line per action.
+_PACK_PY = r"""
+import os, sys, zipfile, tempfile
+TINY = int(sys.argv[1]); WANT_ROOT = sys.argv[2] == '1'
+NAMED = set(n for n in sys.argv[3].split('|') if n)   # file names the task text mentions
+def is_input(name, d):
+    # a file of the same name elsewhere in the task folder (outside the zip's folder) is an input, not a deliverable
+    root = os.path.dirname(d)
+    for top, dirs, files in os.walk(root):
+        if os.path.abspath(top).startswith(os.path.abspath(d)):
+            continue
+        if name in files:
+            return True
+    return False
+def wanted(name, d):
+    if name.startswith('.') or name.endswith('.zip'):
+        return False
+    if NAMED:
+        return name in NAMED and 'template' not in name.lower() and name != 'task.md' and not is_input(name, d)
+    return 'template' not in name.lower() and name.lower() != 'readme.txt' and not is_input(name, d)
+def real_files(d, skip):
+    out = []
+    for name in sorted(os.listdir(d)):
+        q = os.path.join(d, name)
+        if os.path.isfile(q) and q != skip and os.path.getsize(q) >= TINY and wanted(name, d):
+            out.append(q)
+    return out
+def write(zpath, items):
+    fd, tmp = tempfile.mkstemp(dir=os.path.dirname(zpath), suffix='.zip'); os.close(fd)
+    with zipfile.ZipFile(tmp, 'w', zipfile.ZIP_DEFLATED) as z:
+        for arc, data in items:
+            z.writestr(arc, data)
+    os.replace(tmp, zpath)
+for zp in sys.argv[4:]:
+    d = os.path.dirname(zp)
+    if not os.path.isdir(d):
+        continue
+    ok = os.path.isfile(zp) and os.path.getsize(zp) > 0 and zipfile.is_zipfile(zp)
+    if not ok:
+        files = real_files(d, zp)
+        if files:
+            write(zp, [(os.path.basename(q), open(q, 'rb').read()) for q in files])
+            print('PACKED', zp, len(files), 'files from', d, [os.path.basename(q) for q in files])
+        continue
+    if not WANT_ROOT:
+        continue
+    z = zipfile.ZipFile(zp)
+    members = [i for i in z.infolist() if not i.is_dir() and not os.path.basename(i.filename).startswith('.')]
+    if members and all('/' in i.filename for i in members):
+        keep = [i for i in members if wanted(os.path.basename(i.filename), d) and i.file_size >= TINY]
+        base = [os.path.basename(i.filename) for i in keep]
+        if keep and len(set(base)) == len(base):
+            items = [(b, z.read(i)) for b, i in zip(base, keep)]
+            z.close()
+            write(zp, items)
+            print('FLATTENED', zp, len(items), 'of', len(members), 'files', base)
+"""
+
+_NAME_RE = re.compile(r"[A-Za-z0-9][\w.-]*\.(?:xlsx|xlsm|csv|md|pdf|json|dxf|dwg|txt|docx|xml|ifc|py|ipynb|yaml|yml|png|svg)\b")
+_ROOT_RE = re.compile(r"(at (the|its) (archive |zip )?root|no enclosing folder|root of the (zip|archive)|containing exactly (these|the following) )", re.I)
+
+
+async def finalize_zips(session, task_text):
+  """Deterministic last step: make every zip the task asks for a real zip, packed as the task says."""
+  zips = [p for p in candidate_paths(task_text) if p.lower().endswith(".zip")]
+  if not zips:
+    return
+  want_root = "1" if _ROOT_RE.search(task_text or "") else "0"
+  quoted = " ".join(shlex.quote(p) for p in zips)
+  named = "|".join(sorted(set(m.group(0) for m in _NAME_RE.finditer(task_text or ""))))
+  script = (f"command -v python3 >/dev/null 2>&1 && python3 - {TINY_BYTES} {want_root} {shlex.quote(named)} {quoted} <<'PELE_PACK'\n"
+            f"{_PACK_PY}\nPELE_PACK\n")
+  try:
+    result = await session.exec(script, timeout_sec=120)
+    await session.log(f"finalize zips: {result['output'].strip() or 'nothing to do'}")
+  except taskbridge.TaskError as exc:
+    await session.log(f"finalize zips failed: {exc}")
 
 
 # ---------------------------------------------------------------- solve
@@ -804,11 +934,12 @@ async def solve(session):
 
   # Deterministic check first: it is free and catches the most damaging
   # failure mode (a deliverable that was never actually written).
-  problems = await deterministic_check(session, plan, summary)
+  problems = await deterministic_check(session, task, plan, summary)
   if problems and fix_rounds < MAX_FIX_ROUNDS and time_for(WRAP_UP_SEC):
     await fix(
         "A file check (not a reviewer) reports these problems with files "
-        "named in the plan or your summary:\n"
+        "named in the task, the plan or your summary (TINY = a placeholder, BAD = not a valid file "
+        "of its format):\n"
         + "\n".join(problems)
         + "\n\nIf a path is an input file or was renamed on purpose, say so "
         "in your summary; otherwise create or repair the file, re-open it "
@@ -833,10 +964,11 @@ async def solve(session):
         "A reviewer checked your files and found these gaps:\n"
         f"{verdict}\n\nFix them, then reply with your updated summary."
     )
-    problems = await deterministic_check(session, plan, summary)
+    problems = await deterministic_check(session, task, plan, summary)
     if problems:
       await session.log(f"after fix: deterministic problems remain: {problems}")
 
+  await finalize_zips(session, task)
   return summary or session.final_message
 
 
