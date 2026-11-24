@@ -767,14 +767,14 @@ for p in sys.argv[2:]:
                 print('BAD', p, 'not an Office file')
         elif ext == '.pdf':
             with open(p, 'rb') as f:
-                if f.read(5) != b'%PDF-' or n < 1024:
+                if f.read(5) != b'%PDF-':
                     print('BAD', p, 'not a real PDF')
     except Exception as e:
         print('BAD', p, type(e).__name__)
 """
 
 
-async def deterministic_check(session, *texts):
+async def deterministic_check(session, task_text, *texts):
   """Checks that mentioned deliverable files exist and are real files.
 
   One call inside the task container; no model involved. Returns a list of
@@ -783,7 +783,8 @@ async def deterministic_check(session, *texts):
   Office / PDF; a zip whose members are placeholders). Paths the task only
   reads (inputs) exist, so they never show up; directories are skipped.
   """
-  paths = candidate_paths(*texts)
+  own = set(candidate_paths(*texts))   # paths the plan / summary name: full checks
+  paths = candidate_paths(task_text, *texts)   # + paths only the task names: MISSING / EMPTY only
   if not paths:
     return []
   quoted = " ".join(shlex.quote(p) for p in paths)
@@ -804,10 +805,12 @@ async def deterministic_check(session, *texts):
   except taskbridge.TaskError as exc:
     await session.log(f"deterministic check failed: {exc}")
     return []
-  problems = [
-      line for line in result["output"].splitlines()
-      if line.startswith(("MISSING ", "EMPTY ", "TINY ", "BAD "))
-  ]
+  problems = []
+  for line in result["output"].splitlines():
+    kind, _, rest = line.partition(" ")
+    path = rest.split(" ", 1)[0]
+    if kind in ("MISSING", "EMPTY") or (kind in ("TINY", "BAD") and path in own):
+      problems.append(line)
   await session.log(f"deterministic check: {len(paths)} paths, {len(problems)} problems; checked: {paths[:8]}; problems: {problems[:8]}")
   return problems
 
@@ -820,26 +823,17 @@ _PACK_PY = r"""
 import os, sys, zipfile, tempfile
 TINY = int(sys.argv[1]); WANT_ROOT = sys.argv[2] == '1'
 NAMED = set(n for n in sys.argv[3].split('|') if n)   # file names the task text mentions
-def is_input(name, d):
-    # a file of the same name elsewhere in the task folder (outside the zip's folder) is an input, not a deliverable
-    root = os.path.dirname(d)
-    for top, dirs, files in os.walk(root):
-        if os.path.abspath(top).startswith(os.path.abspath(d)):
-            continue
-        if name in files:
-            return True
-    return False
-def wanted(name, d):
-    if name.startswith('.') or name.endswith('.zip'):
+def deliverable(name):
+    # used only when a zip must be rebuilt: never pack templates, the task statement, hidden files or zips
+    low = name.lower()
+    if name.startswith('.') or low.endswith('.zip') or 'template' in low or name == 'task.md':
         return False
-    if NAMED:
-        return name in NAMED and 'template' not in name.lower() and name != 'task.md' and not is_input(name, d)
-    return 'template' not in name.lower() and name.lower() != 'readme.txt' and not is_input(name, d)
+    return name in NAMED if NAMED else low != 'readme.txt'
 def real_files(d, skip):
     out = []
     for name in sorted(os.listdir(d)):
         q = os.path.join(d, name)
-        if os.path.isfile(q) and q != skip and os.path.getsize(q) >= TINY and wanted(name, d):
+        if os.path.isfile(q) and q != skip and os.path.getsize(q) >= TINY and deliverable(name):
             out.append(q)
     return out
 def write(zpath, items):
@@ -864,13 +858,13 @@ for zp in sys.argv[4:]:
     z = zipfile.ZipFile(zp)
     members = [i for i in z.infolist() if not i.is_dir() and not os.path.basename(i.filename).startswith('.')]
     if members and all('/' in i.filename for i in members):
-        keep = [i for i in members if wanted(os.path.basename(i.filename), d) and i.file_size >= TINY]
-        base = [os.path.basename(i.filename) for i in keep]
-        if keep and len(set(base)) == len(base):
-            items = [(b, z.read(i)) for b, i in zip(base, keep)]
+        # every member is kept, only its folder prefix is dropped; a name clash leaves the zip as it is
+        base = [os.path.basename(i.filename) for i in members]
+        if len(set(base)) == len(base):
+            items = [(b, z.read(i)) for b, i in zip(base, members)]
             z.close()
             write(zp, items)
-            print('FLATTENED', zp, len(items), 'of', len(members), 'files', base)
+            print('FLATTENED', zp, len(items), 'files', base)
 """
 
 _NAME_RE = re.compile(r"[A-Za-z0-9][\w.-]*\.(?:xlsx|xlsm|csv|md|pdf|json|dxf|dwg|txt|docx|xml|ifc|py|ipynb|yaml|yml|png|svg)\b")
@@ -941,8 +935,9 @@ async def solve(session):
         "named in the task, the plan or your summary (TINY = a placeholder, BAD = not a valid file "
         "of its format):\n"
         + "\n".join(problems)
-        + "\n\nIf a path is an input file or was renamed on purpose, say so "
-        "in your summary; otherwise create or repair the file, re-open it "
+        + "\n\nIf a path is an input file, was renamed on purpose, or a file is genuinely "
+        "this short, say so in your summary instead of padding it; "
+        "otherwise create or repair the file, re-open it "
         "to confirm, then reply with your updated summary."
     )
 
